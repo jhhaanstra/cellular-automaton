@@ -1,3 +1,6 @@
+mod rules;
+mod grid;
+
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use vector2d::Vector2D;
