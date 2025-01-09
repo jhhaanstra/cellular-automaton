@@ -44,7 +44,8 @@ impl Grid {
     pub fn get_neighbours(&self, cell: &Vector2D<i32>) -> Vec<Vector2D<i32>> {
         Self::DIRECTIONS.iter()
             .map(|direction| cell + &direction)
-            .filter(|point| self.cells.contains_key(&Self::to_tuple(&point)))
+            .filter(|point| *self.cells.get(&Self::to_tuple(&point))
+                .unwrap_or(&false))
             .collect()
     }
 
