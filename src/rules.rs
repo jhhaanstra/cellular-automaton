@@ -1,20 +1,20 @@
 use crate::grid::{Grid, Vector};
 
 pub trait Rule {
-    fn complies(point: Vector, grid: Grid) -> bool;
+    fn complies(point: &Vector, grid: &Grid) -> bool;
 }
 
-struct HasTwoOrThreeNeighbours;
-struct HasThreeNeighbours;
+pub struct HasTwoOrThreeNeighbours;
+pub struct HasThreeNeighbours;
 impl Rule for HasTwoOrThreeNeighbours {
-    fn complies(point: Vector, grid: Grid) -> bool {
+    fn complies(point: &Vector, grid: &Grid) -> bool {
         let nr_neighbours = grid.get_neighbours(&point).len();
         nr_neighbours == 2 || nr_neighbours == 3
     }
 }
 
 impl Rule for HasThreeNeighbours {
-    fn complies(point: Vector, grid: Grid) -> bool {
+    fn complies(point: &Vector, grid: &Grid) -> bool {
         grid.get_neighbours(&point).len() == 3
     }
 }
@@ -32,7 +32,7 @@ mod has_two_or_three_neighbours_tests {
             Vector::new(0, 0),
         ]);
 
-        assert!(HasTwoOrThreeNeighbours::complies(Vector::new(1, 1), grid));
+        assert!(HasTwoOrThreeNeighbours::complies(&Vector::new(1, 1), &grid));
     }
 
     #[test]
@@ -44,7 +44,7 @@ mod has_two_or_three_neighbours_tests {
             Vector::new(2, 1),
         ]);
 
-        assert!(HasTwoOrThreeNeighbours::complies(Vector::new(1, 1), grid));
+        assert!(HasTwoOrThreeNeighbours::complies(&Vector::new(1, 1), &grid));
     }
 
     #[test]
@@ -54,7 +54,7 @@ mod has_two_or_three_neighbours_tests {
             Vector::new(2, 2),
         ]);
 
-        assert!(!HasTwoOrThreeNeighbours::complies(Vector::new(1, 1), grid));
+        assert!(!HasTwoOrThreeNeighbours::complies(&Vector::new(1, 1), &grid));
     }
 
     #[test]
@@ -67,7 +67,7 @@ mod has_two_or_three_neighbours_tests {
             Vector::new(1, 2),
         ]);
 
-        assert!(!HasTwoOrThreeNeighbours::complies(Vector::new(1, 1), grid));
+        assert!(!HasTwoOrThreeNeighbours::complies(&Vector::new(1, 1), &grid));
     }
 }
 
@@ -85,7 +85,7 @@ mod has_three_neighbours_tests {
             Vector::new(2, 1),
         ]);
 
-        assert!(HasThreeNeighbours::complies(Vector::new(1, 1), grid));
+        assert!(HasThreeNeighbours::complies(&Vector::new(1, 1), &grid));
     }
 
     #[test]
@@ -96,7 +96,7 @@ mod has_three_neighbours_tests {
             Vector::new(1, 2),
         ]);
 
-        assert!(!HasThreeNeighbours::complies(Vector::new(1, 1), grid));
+        assert!(!HasThreeNeighbours::complies(&Vector::new(1, 1), &grid));
     }
 
     #[test]
@@ -109,6 +109,6 @@ mod has_three_neighbours_tests {
             Vector::new(1, 2),
         ]);
 
-        assert!(!HasThreeNeighbours::complies(Vector::new(1, 1), grid));
+        assert!(!HasThreeNeighbours::complies(&Vector::new(1, 1), &grid));
     }
 }
