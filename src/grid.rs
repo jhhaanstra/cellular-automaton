@@ -1,8 +1,9 @@
 use std::collections::HashSet;
 use std::ops::Add;
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Grid {
-    cells: HashSet<Vector>
+    pub cells: HashSet<Vector>
 }
 
 impl Grid {
@@ -33,14 +34,24 @@ impl Grid {
         self.cells.remove(cell);
     }
 
+    pub fn get_occupied_cells(&self) -> Vec<Vector> {
+        self.cells.iter().cloned().collect()
+    }
+
     pub fn contains(&self, cell: &Vector) -> bool {
         self.cells.contains(cell)
     }
 
-    pub fn get_neighbours(&self, cell: &Vector) -> Vec<Vector> {
+    pub fn get_occupied_neighbours(&self, cell: &Vector) -> Vec<Vector> {
+        self.get_neighbouring_cells(cell)
+            .into_iter()
+            .filter(|point| self.cells.contains(point))
+            .collect()
+    }
+
+    pub fn get_neighbouring_cells(&self, cell: &Vector) -> Vec<Vector> {
         Self::DIRECTIONS.iter()
             .map(|direction| cell + direction)
-            .filter(|point| self.cells.contains(point))
             .collect()
     }
 }
@@ -142,24 +153,36 @@ mod grid_tests {
     fn should_find_no_neighbours() {
         let grid = Grid::new();
         let point = &Vector { x: 1, y: 1 };
-        assert_eq!(grid.get_neighbours(point), vec![]);
+        assert_eq!(grid.get_occupied_neighbours(point), vec![]);
     }
 
     #[test]
-    fn should_find_neighbours() {
+    fn should_find_occupied_neighbours() {
         let mut grid = Grid::new();
         grid.add_cells(&vec![
             Vector::new(0, 2),
-            Vector::new(1, 2),
             Vector::new(2, 2),
             Vector::new(0, 1),
-            Vector::new(2, 1),
             Vector::new(0, 0),
             Vector::new(1, 0),
             Vector::new(2, 0),
         ]);
         let point = Vector { x: 1, y: 1 };
-        let neighbours = grid.get_neighbours(&point);
+        let neighbours = grid.get_occupied_neighbours(&point);
+        assert_eq!(neighbours.len(), 6);
+        assert!(neighbours.contains(&Vector::new(0, 2)));
+        assert!(neighbours.contains(&Vector::new(2, 2)));
+        assert!(neighbours.contains(&Vector::new(0, 1)));
+        assert!(neighbours.contains(&Vector::new(0, 0)));
+        assert!(neighbours.contains(&Vector::new(1, 0)));
+        assert!(neighbours.contains(&Vector::new(2, 0)));
+    }
+
+    #[test]
+    fn should_find_neighbours() {
+        let mut grid = Grid::new();
+        let point = Vector { x: 1, y: 1 };
+        let neighbours = grid.get_neighbouring_cells(&point);
         assert_eq!(neighbours.len(), 8);
         assert!(neighbours.contains(&Vector::new(0, 2)));
         assert!(neighbours.contains(&Vector::new(1, 2)));

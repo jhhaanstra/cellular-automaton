@@ -8,14 +8,14 @@ pub struct HasTwoOrThreeNeighbours;
 pub struct HasThreeNeighbours;
 impl Rule for HasTwoOrThreeNeighbours {
     fn complies(point: &Vector, grid: &Grid) -> bool {
-        let nr_neighbours = grid.get_neighbours(&point).len();
+        let nr_neighbours = grid.get_occupied_neighbours(&point).len();
         nr_neighbours == 2 || nr_neighbours == 3
     }
 }
 
 impl Rule for HasThreeNeighbours {
     fn complies(point: &Vector, grid: &Grid) -> bool {
-        grid.get_neighbours(&point).len() == 3
+        grid.get_occupied_neighbours(&point).len() == 3
     }
 }
 
