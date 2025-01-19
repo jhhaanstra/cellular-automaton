@@ -3,50 +3,68 @@ mod grid;
 
 use crate::grid::{Grid, Vector};
 use crate::rules::{HasThreeNeighbours, HasTwoOrThreeNeighbours, Rule};
+use clap::{command, value_parser, Arg, ArgAction};
+use regex::Regex;
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::thread;
 use std::time::Duration;
-use clap::{Arg, ArgAction, Command};
-use clap::builder::TypedValueParser;
-use regex::Regex;
 
-// For later
-fn cli() -> Command {
-    Command::new("git")
-        .about("A fictional versioning CLI")
+fn cli() -> Game{
+    let matches = command!()
+        .about("Simulation of Conway's Game of Life.")
         .version("0.1")
         .arg(
             Arg::new("input")
                 .short('i')
                 .long("input")
                 .help("List of cells that should be alive when the simulation starts. Concatenated by a semicolon. E.g. 1,2;3,4 maps to the cells x1,y2 and x3,y4 to be alive when the simulation starts.")
-                // .required(true)
-                .default_value("1,1;1,2;1,3")
+                .required(true)
                 .action(ArgAction::Set)
         )
         .arg(
-            Arg::new("dimensions")
-                .short('d') // Short flag, e.g., -n
-                .long("dimensions") // Long flag, e.g., --name
-                .value_name("DIMENSIONS")
-                .help("Dimensions of the grid in the display (e.g. 10x10 when 10 is provided)")
-                .action(ArgAction::Set)
+            Arg::new("width")
+                .long("width")
+                .value_parser(value_parser!(i32))
+                .default_value("120")
+                .help("Width of the viewport in the terminal")
+                .action(ArgAction::Append),
         )
+        .arg(
+            Arg::new("height")
+                .long("height")
+                .value_parser(value_parser!(i32))
+                .default_value("60")
+                .help("Height of the viewport in the terminal")
+                .action(ArgAction::Append)
+        )
+        .get_matches();
+
+    let width = *matches
+        .get_one::<i32>("width")
+        .expect("default ensures there is always a value");
+
+    let height = *matches
+        .get_one::<i32>("height")
+        .expect("default ensures there is always a value");
+
+    let grid = matches
+        .get_one::<String>("input")
+        .map(parse_input)
+        .map(|cells| Grid::from_cells(HashSet::from(cells)))
+        .expect("default ensures there is always a value");
+
+    Game { width, height, grid }
 }
 
 fn main() {
-    let grid = Grid {
-        cells: parse_input(&String::from("20,19;19,20;20,20;20,21;21,21"))
-    };
-
-    let mut game = Game::new(40, grid);
+    let mut game = cli();
     let running: bool = true;
 
     while running {
         std::process::Command::new("clear").status().unwrap();
         print!("{}", game);
-        thread::sleep(Duration::from_millis(50));
+        thread::sleep(Duration::from_millis(100));
         game.update();
     }
 }
@@ -70,12 +88,8 @@ struct Game {
 }
 
 impl Game {
-    fn new(dimensions: i32, grid: Grid) -> Game {
-        Game {
-            width: dimensions,
-            height: dimensions,
-            grid,
-        }
+    fn new(width: i32, height: i32, grid: Grid) -> Game {
+        Game { width, height, grid }
     }
 
     fn update(&mut self) {
@@ -123,9 +137,9 @@ impl Display for Game {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
     use crate::grid::{Grid, Vector};
     use crate::{parse_input, Game};
+    use std::collections::HashSet;
 
     #[test]
     fn should_parse_input() {
@@ -139,7 +153,7 @@ mod tests {
         let mut grid = Grid::new();
         grid.add_cells(&vec![Vector::new(1, 2), Vector::new(2, 0)]);
 
-        let game = Game::new(3, grid);
+        let game = Game::new(3, 3, grid);
         assert_eq!(String::from(format!("{}", game)), "..X\n...\n.X.\n");
     }
 
@@ -153,7 +167,7 @@ mod tests {
             Vector::new(1, 1),
         ]);
 
-        let mut game = Game::new(3, grid.clone());
+        let mut game = Game::new(3, 3, grid.clone());
         game.update();
 
         assert_eq!(game.grid, grid)
@@ -175,7 +189,7 @@ mod tests {
             Vector::new(2, 1),
         ]);
 
-        let mut game = Game::new(3, state1.clone());
+        let mut game = Game::new(3, 3, state1.clone());
 
         game.update();
         assert_eq!(game.grid, state2);

@@ -22,6 +22,10 @@ impl Grid {
         Grid{cells: HashSet::new()}
     }
 
+    pub fn from_cells(cells: HashSet<Vector>) -> Grid {
+        Grid{ cells }
+    }
+
     pub fn add_cells(&mut self, cells: &Vec<Vector>) {
         cells.iter().for_each(|cell| self.add_cell(cell));
     }
