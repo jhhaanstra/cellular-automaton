@@ -14,3 +14,18 @@ following rules:
 
 https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life
 
+Build Instructions
+==================
+Build the game with `cargo build`. Then run the binary that is placed in `target/debug`.
+```shell
+Usage: game-of-life [OPTIONS] --input <input>
+
+Options:
+-i, --input <input>    List of cells that should be alive when the simulation starts. Concatenated by a semicolon. E.g. 1,2;3,4 maps to the cells x1,y2 and x3,y4 to be alive when the simulation starts.
+--width <width>    Width of the viewport in the terminal [default: 120]
+--height <height>  Height of the viewport in the terminal [default: 60]
+-h, --help             Print help
+-V, --version          Print version
+```
+
+Example input: `./target/debug/game-of-life --width 100 --height 60 -i "0,2;1,2;2,2;2,1;1,0"`
