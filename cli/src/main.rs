@@ -1,8 +1,5 @@
-mod rules;
-mod grid;
-
-use crate::grid::{Grid, Vector};
-use crate::rules::{HasThreeNeighbours, HasTwoOrThreeNeighbours, Rule};
+use core::grid::{Grid, Vector};
+use core::rules::{HasThreeNeighbours, HasTwoOrThreeNeighbours, Rule};
 use clap::{command, value_parser, Arg, ArgAction};
 use regex::Regex;
 use std::collections::HashSet;
@@ -88,9 +85,6 @@ struct Game {
 }
 
 impl Game {
-    fn new(width: i32, height: i32, grid: Grid) -> Game {
-        Game { width, height, grid }
-    }
 
     fn update(&mut self) {
         let mut new_state = HashSet::new();
