@@ -184,7 +184,7 @@ mod grid_tests {
 
     #[test]
     fn should_find_neighbours() {
-        let mut grid = Grid::new();
+        let grid = Grid::new();
         let point = Vector { x: 1, y: 1 };
         let neighbours = grid.get_neighbouring_cells(&point);
         assert_eq!(neighbours.len(), 8);
