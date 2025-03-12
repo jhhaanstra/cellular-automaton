@@ -1,63 +1,66 @@
+use core::grid::Grid;
+use core::grid::Vector;
+
 use bevy::prelude::*;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(HelloPlugin)
+        .add_systems(Startup, setup)
         .run();
 }
 
-#[derive(Component)]
-struct Position {
-    x: f32,
-    y: f32,
-}
+const GRID_DIMENSION: f32 = 25.0;
 
 #[derive(Component)]
-struct Person;
-
-#[derive(Component)]
-struct Name(String);
-
-fn add_people(mut commands: Commands) {
-    commands.spawn((Person, Name("Elaina Proctor".to_string())));
-    commands.spawn((Person, Name("Renzo Hume".to_string())));
-    commands.spawn((Person, Name("Zayna Nieves".to_string())));
+struct View {
+    pub grid: Grid,
+    pub width: i32,
+    pub height: i32,
 }
 
-fn print_position_system(query: Query<&Position>) {
-    for position in &query {
-        println!("position: {} {}", position.x, position.y);
-    }
-}
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    commands.spawn(Camera2d);
+    let mut grid = Grid::new();
+    grid.add_cells(&vec![
+        Vector::new(0, 0),
+        Vector::new(1, 0),
+        Vector::new(2, 0),
+    ]);
 
-fn greet_people(query: Query<&Name, With<Person>>) {
-    for name in &query {
-        println!("hello {}!", name.0);
-    }
-}
+    for x in -10..10 {
+        for y in -10..10 {
+            let shape = meshes.add(Rectangle::new(GRID_DIMENSION, GRID_DIMENSION));
 
-fn update_people(mut query: Query<&mut Name, With<Person>>) {
-    for mut name in &mut query {
-        if name.0 == "Elaina Proctor" {
-            name.0 = "Elaina Hume".to_string();
-            break; // We don't need to change any other names.
+            let color = match grid.contains(&Vector::new(x, y)) {
+                true => Color::srgb(0.0, 0.0, 0.0),
+                false => Color::srgb(1.0, 1.0, 1.0)
+            };
+
+            commands.spawn((
+                Mesh2d(shape),
+                MeshMaterial2d(materials.add(color)),
+                Transform::from_xyz(
+                    GRID_DIMENSION * x as f32,
+                    GRID_DIMENSION * y as f32,
+                    0.0,
+                ),
+            ));
         }
     }
 }
 
-struct Entity(u64);
+fn add_grid(mut commands: Commands) {
+    let mut grid = Grid::new();
+    grid.add_cells(&vec![
+        Vector::new(0, 0),
+        Vector::new(1, 0),
+        Vector::new(2, 0),
+    ]);
 
-fn hello_world() {
-    println!("hello world!");
-}
-
-pub struct HelloPlugin;
-
-impl Plugin for HelloPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, add_people);
-        app.add_systems(Update, (hello_world, (update_people, greet_people).chain()));
-    }
-
+    commands.spawn(View{grid, width: 100, height: 100});
 }
